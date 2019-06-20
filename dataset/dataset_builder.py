@@ -67,5 +67,5 @@ class MMDataset(Dataset):
             ])
         ], random_order=True)
 
-        image_aug = augment.augment_image(image)
+        image_aug = augmentent.augment_image(image)
         return image_aug
