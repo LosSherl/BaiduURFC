@@ -33,7 +33,7 @@ class Bottleneck(nn.Module):
         out = self.bn3(self.conv3(out))
         x = self.shortcut(x)
         d = self.out_channels
-        out = torch.cat([x[:,:d,:,:] + out[:,:d,:,:], x[:,:d,:,:], out[:,d:,:,:]],1)
+        out = torch.cat([x[:,:d,:,:] + out[:,:d,:,:], x[:,d:,:,:], out[:,d:,:,:]],1)
         out = F.relu(out)
         return out
 
@@ -76,16 +76,16 @@ def DPN26():
         'in_channels': (96, 192, 384, 768),
         'out_channels': (256, 512, 1024, 2048),
         'num_blocks': (16, 32, 24, 128),
-        'dense_depth': (16,32,24,128)
+        'dense_depth': (16, 32, 24, 128)
     }
     return DPN(cfg)
 
 def DPN92():
     cfg = {
-        'in_channels': (96,192,384,768),
-        'out_channels': (256,512,1024,2048),
-        'num_blocks': (3,4,20,3),
-        'dense_depth': (16,32,24,128)
+        'in_channels': (96, 192, 384, 768),
+        'out_channels': (256, 512, 1024, 2048),
+        'num_blocks': (3, 4, 20, 3),
+        'dense_depth': (16, 32, 24, 128)
     }
     return DPN(cfg)
 
