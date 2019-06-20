@@ -100,7 +100,7 @@ class MultiModalNet(nn.Module):
 
         self.img_encoder = list(img_model.children())[:-2]
         self.img_encoder.append(nn.AdaptiveAvgPool2d(1))
-        self.img_encoder == nn.Sequential(*self.img_encoder)
+        self.img_encoder = nn.Sequential(*self.img_encoder)
 
         if drop > 0:
             self.img_fc = nn.Sequential(
