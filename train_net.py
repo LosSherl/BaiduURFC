@@ -85,7 +85,7 @@ def main():
     parser = argparse.ArgumentParser(description="Baidu URFC")
     parser.add_argument(
         "-p", 
-        dest = "data_path",
+        dest = "root_path",
         help = "path to data"
     )
     parser.add_argument(
