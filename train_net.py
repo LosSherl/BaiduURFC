@@ -148,10 +148,10 @@ def main():
     test_visit = os.path.join(args.root_path, "npy", "test_visit")
     
     trndatasets = MMDataset(train_datalist, train_img, train_visit, mode="train")
-    trndata_loader = DataLoader(trndatasets, batch_sampler=args.batch_size, shuffle=True, pin_memory=True, num_workers=1)
+    trndata_loader = DataLoader(trndatasets, batch_size=args.batch_size, shuffle=True, pin_memory=True, num_workers=1)
     
     valdatasets = MMDataset(val_datalist, train_img, train_visit, augment=False, mode="train")
-    valdata_loader = DataLoader(valdatasets, batch_sampler=args.batch_size, shuffle=False, pin_memory=True, num_workers=1)
+    valdata_loader = DataLoader(valdatasets, batch_size=args.batch_size, shuffle=False, pin_memory=True, num_workers=1)
 
     testdatasets = MMDataset(test_files, test_img, test_visit, augment=False, mode="test")
     test_loader = DataLoader(testdatasets, 1, shuffle=False, pin_memory=True, num_workers=1)
