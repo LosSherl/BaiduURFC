@@ -16,7 +16,7 @@ class MMDataset(Dataset):
         self.augment = augment
         self.vis_path = vis_path
         self.images_df.Id = self.images_df.Id.apply(lambda x : root_path / str(x).zfill(6))
-        self.mode = model
+        self.mode = mode
     
     def __len__(self):
         return len(self.images_df)
