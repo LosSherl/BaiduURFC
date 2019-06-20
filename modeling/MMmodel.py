@@ -26,15 +26,15 @@ class Bottleneck(nn.Module):
                 nn.BatchNorm2d(out_channels + dense_depth)
             )
         
-        def forward(self, x):
-            out = F.relu(self.bn1(self.conv1(x)))
-            out = F.relu(self.bn2(self.conv2(out)))
-            out = self.bn3(self.conv3(out))
-            x = self.shortcut(x)
-            d = self.out_channels
-            out = torch.cat([x[:,:d,:,:] + out[:,:d,:,:], x[:,:d,:,:], out[:,d:,:,:]],1)
-            out = F.relu(out)
-            return out
+    def forward(self, x):
+        out = F.relu(self.bn1(self.conv1(x)))
+        out = F.relu(self.bn2(self.conv2(out)))
+        out = self.bn3(self.conv3(out))
+        x = self.shortcut(x)
+        d = self.out_channels
+        out = torch.cat([x[:,:d,:,:] + out[:,:d,:,:], x[:,:d,:,:], out[:,d:,:,:]],1)
+        out = F.relu(out)
+        return out
 
 class DPN(nn.Module):
     def __init__(self, cfg):
