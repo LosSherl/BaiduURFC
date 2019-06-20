@@ -8,13 +8,14 @@ import pandas as pd
 from torch.utils.data import DataLoader
 import logging
 import time
+import datetime
 
 from Utils.logger import setupLogger
 from Utils.checkpoint import Checkpointer
 from modeling.MMmodel import MultiModalNet
 from dataset.dataset_builder import MMDataset
 
-def do_train(model, device, trndata_loader, valdata_loader, optimizer, criterion, scheduler, nepochs, checkpoint_period):
+def do_train(model, device, trndata_loader, valdata_loader, optimizer, criterion, scheduler, nepochs, checkpoint_period, checkpointer):
     logger = logging.getLogger(name="URFC")
     logger.info("Start training")
     
@@ -56,7 +57,7 @@ def do_train(model, device, trndata_loader, valdata_loader, optimizer, criterion
                 )
         time_spent = time.time() - start_training_time
         logger.info("Epoch:[{}/{}], Time spent {}, Time per epoch {:.4f} s".format(
-            epoch + 1, num_epochs, str(datetime.timedelta(seconds=time_spent)), time_spent / (epoch + 1)))
+            epoch + 1, nepochs, str(datetime.timedelta(seconds=time_spent)), time_spent / (epoch + 1)))
         if (epoch + 1) % checkpoint_period == 0:
             checkpointer.save("model_{:07d}".format(epoch + 1))
 
@@ -68,16 +69,16 @@ def do_train(model, device, trndata_loader, valdata_loader, optimizer, criterion
                 visits = visits.to(device)
                 idx_labels = labels.clone()
                 labels = torch.from_numpy(np.array(labels)).long().to(device)
-                acc = skl.accuracy_score(target.cpu().data.numpy(),np.argmax(F.softmax(output).cpu().data.numpy(), axis=1))
+                acc = accuracy_score(labels.cpu().data.numpy(),np.argmax(F.softmax(output).cpu().data.numpy(), axis=1))
         logger.info("Epoch:[{}/{}], Validation acc@1: {}%".format(
-            epoch + 1, num_epochs, 100 * acc))   
+            epoch + 1, nepochs, 100 * acc))   
 
     checkpointer.save("model_final")
     total_training_time = time.time() - start_training_time
     total_time_str = str(datetime.timedelta(seconds=total_training_time))
     logger.info(
         "Total training time: {} ({:.4f} s / epoch)".format(
-            total_time_str, total_training_time / (num_epochs)
+            total_time_str, total_training_time / (nepochs)
         )
     )
 
@@ -156,9 +157,11 @@ def main():
     testdatasets = MMDataset(test_files, test_img, test_visit, augment=False, mode="test")
     test_loader = DataLoader(testdatasets, 1, shuffle=False, pin_memory=True, num_workers=1)
 
-    
+    checkpointer = Checkpointer(
+        model, optimizer, criterion, scheduler, args.output_dir,
+    )
 
-    do_train(model, device, trndata_loader, valdata_loader, optimizer, criterion, scheduler, args.nepochs, args.checkpoint_period)
+    do_train(model, device, trndata_loader, valdata_loader, optimizer, criterion, scheduler, args.nepochs, args.checkpoint_period, checkpointer)
 
 if __name__ == "__main__":
     main()
