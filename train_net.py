@@ -145,7 +145,7 @@ def main():
     
     if torch.cuda.device_count() > 1:
         model = torch.nn.DataParallel(model)
-    model = model.to(device)
+    model.to(device)
     
     all_files = pd.read_csv("train.csv")
     test_files = pd.read_csv("test.csv")
