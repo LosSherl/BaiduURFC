@@ -52,7 +52,7 @@ class MMDataset(Dataset):
 
     def augmentor(self, image):
         augmentent = augmenters.Sequential([
-            augmenters.Filplr(0.5),
+            augmenters.Fliplr(0.5),
             augmenters.Flipud(0.5),
             augmenters.SomeOf((0,4),[
                 augmenters.Affine(rotate=90),
