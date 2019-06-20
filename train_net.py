@@ -16,7 +16,7 @@ from dataset.dataset_builder import MMDataset
 
 def do_train(model, device, trndata_loader, valdata_loader, optimizer, criterion, scheduler, nepochs, checkpoint_period):
     logger = logging.getLogger(name="URFC")
-    logger.info("Start training")]
+    logger.info("Start training")
     
     total_step = len(trndata_loader)
     start_training_time = time.time()
@@ -80,7 +80,7 @@ def do_train(model, device, trndata_loader, valdata_loader, optimizer, criterion
             total_time_str, total_training_time / (num_epochs)
         )
     )
-    
+
 def main():
     parser = argparse.ArgumentParser(description="Baidu URFC")
     parser.add_argument(
