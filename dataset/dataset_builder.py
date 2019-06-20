@@ -46,7 +46,7 @@ class MMDataset(Dataset):
     def read_npy(self, index):
         row = self.images_df.iloc[index]
         filename = os.path.basename(str(row.Id.absolute()))
-        p = os.path.join(str(self.vis_path.absolute()), filename + "npy")
+        p = os.path.join(str(self.vis_path.absolute()), filename + ".npy")
         visit = np.load(p)
         return visit
 
