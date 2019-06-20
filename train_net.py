@@ -144,7 +144,7 @@ def main():
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
     
     if torch.cuda.device_count() > 1:
-        model = nn.DataParallel(model)
+        model = torch.nn.DataParallel(model)
     model = model.to(device)
     
     all_files = pd.read_csv("train.csv")
