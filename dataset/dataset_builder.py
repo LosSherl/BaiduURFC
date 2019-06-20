@@ -31,8 +31,8 @@ class MMDataset(Dataset):
         if self.augment:
             x = self.augmentor(x)
         x = transforms.Compose([
-            transforms.ToPILImage,
-            transforms.ToTensor
+            transforms.ToPILImage(),
+            transforms.ToTensor()
         ])(x)
         visit = transforms.ToTensor()(visit)
         return x.float(), visit.float(), y
