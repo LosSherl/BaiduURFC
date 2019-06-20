@@ -8,10 +8,10 @@ from imgaug import augmenters
 
 class MMDataset(Dataset):
     def __init__(self, images_df, root_path, vis_path, augment=True, mode="train"):
-        # if not isinstance(root_path, pathlib.Path):
-        #     root_path = pathlib.Path(root_path)
-        # if not isinstance(vis_path, pathlib.Path):
-        #     vis_path = pathlib.Path(vis_path)
+        if not isinstance(root_path, pathlib.Path):
+            root_path = pathlib.Path(root_path)
+        if not isinstance(vis_path, pathlib.Path):
+            vis_path = pathlib.Path(vis_path)
         self.images_df = images_df.copy()
         self.augment = augment
         self.vis_path = vis_path
@@ -46,7 +46,7 @@ class MMDataset(Dataset):
     def read_npy(self, index):
         row = self.images_df.iloc[index]
         filename = os.path.basename(str(row.Id.absolute()))
-        p = os.path.join(self.vis_path, filename + ".npy")
+        p = os.path.join(str(self.vis_path.absolute()), filename + "npy")
         visit = np.load(p)
         return visit
 
