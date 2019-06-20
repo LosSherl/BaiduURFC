@@ -29,7 +29,7 @@ class MMDataset(Dataset):
         else:
             y = str(self.images_df.iloc[index].Id.absolute())
         if self.augment:
-            x = self.augment(x)
+            x = self.augmentor(x)
         x = transforms.Compose([
             transforms.ToPILImage,
             transforms.ToTensor
