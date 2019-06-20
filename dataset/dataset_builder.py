@@ -45,9 +45,9 @@ class MMDataset(Dataset):
 
     def read_npy(self, index):
         row = self.images_df.iloc[index]
-        filename = os.path.basename(str(row.Id.absolute())) + ".npy"
+        filename = os.path.basename(str(row.Id.absolute()))
         p = os.path.join(self.vis_path.absolute(), filename)
-        visit = np.load(p)
+        visit = np.load(p + ".npy")
         return visit
 
     def augmentor(self, image):
