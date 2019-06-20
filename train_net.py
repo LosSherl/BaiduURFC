@@ -26,7 +26,7 @@ def do_train(model, device, trndata_loader, valdata_loader, optimizer, criterion
         for iteration, (imgs, visits, labels) in enumerate(trndata_loader):
             imgs = imgs.to(device)
             visits = visits.to(device)
-            idx_labels = labels.clone()
+            # idx_labels = labels.clone()
             labels = torch.from_numpy(np.array(labels)).long().to(device)
 
             output = model(imgs, visits)
@@ -36,7 +36,7 @@ def do_train(model, device, trndata_loader, valdata_loader, optimizer, criterion
             loss.backward()
             optimizer.step()
 
-            if iteration % 20 == 0:
+            if iteration % 1 == 0:
                 logger.info(
                 ", ".join(
                         [
@@ -67,7 +67,7 @@ def do_train(model, device, trndata_loader, valdata_loader, optimizer, criterion
             for _, (imgs, visits, labels) in enumerate(valdata_loader):
                 imgs = imgs.to(device)
                 visits = visits.to(device)
-                idx_labels = labels.clone()
+                # idx_labels = labels.clone()
                 labels = torch.from_numpy(np.array(labels)).long().to(device)
                 
                 output = model(imgs, visits)
