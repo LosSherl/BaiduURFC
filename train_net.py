@@ -23,7 +23,6 @@ def do_train(model, device, trndata_loader, valdata_loader, optimizer, criterion
     start_training_time = time.time()
     for epoch in range(nepochs):
         model.train()
-        scheduler.step()
         for iteration, (imgs, visits, labels) in enumerate(trndata_loader):
             imgs = imgs.to(device)
             visits = visits.to(device)
@@ -64,14 +63,21 @@ def do_train(model, device, trndata_loader, valdata_loader, optimizer, criterion
         # val
         model.eval()
         with torch.no_grad():
+            val_loss = 0
             for _, (imgs, visits, labels) in enumerate(valdata_loader):
                 imgs = imgs.to(device)
                 visits = visits.to(device)
                 idx_labels = labels.clone()
                 labels = torch.from_numpy(np.array(labels)).long().to(device)
+                
+                output = model(imgs, visits)
+                val_loss += criterion(output, labels)
+
                 acc = accuracy_score(labels.cpu().data.numpy(),np.argmax(F.softmax(output).cpu().data.numpy(), axis=1))
         logger.info("Epoch:[{}/{}], Validation acc@1: {}%".format(
             epoch + 1, nepochs, 100 * acc))   
+
+        scheduler.step(val_loss)
 
     checkpointer.save("model_final")
     total_training_time = time.time() - start_training_time
