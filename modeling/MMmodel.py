@@ -113,7 +113,7 @@ class MultiModalNet(nn.Module):
                 FCViewer(),
                 nn.Linear(img_model.last_linear.in_features, 256)
             )
-        self.cls = nn.Linear(320, self.num_classes)
+        self.cls = nn.Linear(320, num_classes)
     
     def forward(self, x_img, x_vis):
         x_img = self.img_encoder(x_img)
