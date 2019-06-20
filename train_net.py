@@ -142,7 +142,9 @@ def main():
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
     criterion = torch.nn.CrossEntropyLoss().to(device)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
-
+    
+    if torch.cuda.device_count() > 1:
+        model = nn.DataParallel(model)
     model = model.to(device)
     
     all_files = pd.read_csv("train.csv")
