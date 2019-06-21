@@ -35,7 +35,7 @@ def do_train(model, device, trndata_loader, valdata_loader, optimizer, criterion
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
+            logger.info(torch.cuda.max_memory_allocated() / 1024.0 / 1024.0)
             if iteration % 1 == 0:
                 logger.info(
                 ", ".join(
@@ -138,7 +138,7 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    model = MultiModalNet("se_resnext101_32x4d", "dpn26", 0.5, num_classes=1000, pretrained=False)
+    model = MultiModalNet("se_resnext101_32x4d", "dpn26", 0.5, num_classes=1000, pretrained=True)
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
     criterion = torch.nn.CrossEntropyLoss().to(device)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
