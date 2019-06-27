@@ -76,7 +76,7 @@ def DPN26():
     cfg = {
         'in_channels': (96, 192, 384, 768),
         'out_channels': (256, 512, 1024, 2048),
-        'num_blocks': (16, 32, 24, 128),
+        'num_blocks': (2, 2, 2, 2),
         'dense_depth': (16, 32, 24, 128)
     }
     return DPN(cfg)
@@ -115,17 +115,15 @@ class MultiModalNet(nn.Module):
                 FCViewer(),
                 nn.Linear(img_model.last_linear.in_features, 256)
             )
-        # self.cls = nn.Linear(320, num_classes)
-        self.cls = nn.Linear(256, num_classes)
+        self.cls = nn.Linear(320, num_classes)
 
     def forward(self, x_img, x_vis):
         x_img = self.img_encoder(x_img)
         x_img = self.img_fc(x_img)
 
-        return self.cls(x_img)
 
-        # x_vis = self.visit_model(x_vis)
+        x_vis = self.visit_model(x_vis)
         
-        # x_cat = torch.cat((x_img,x_vis), 1)
-        # x_cat = self.cls(x_cat)
-        # return x_cat
+        x_cat = torch.cat((x_img,x_vis), 1)
+        x_cat = self.cls(x_cat)
+        return x_cat
