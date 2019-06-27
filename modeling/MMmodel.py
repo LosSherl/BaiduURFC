@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import pretrainedmodels
+
 class FCViewer(nn.Module):
     def forward(self, x):
         return x.view(x.size(0), -1)
@@ -114,14 +115,17 @@ class MultiModalNet(nn.Module):
                 FCViewer(),
                 nn.Linear(img_model.last_linear.in_features, 256)
             )
-        self.cls = nn.Linear(320, num_classes)
-    
+        # self.cls = nn.Linear(320, num_classes)
+        self.cls = nn.Linear(256, num_classes)
+
     def forward(self, x_img, x_vis):
         x_img = self.img_encoder(x_img)
         x_img = self.img_fc(x_img)
 
-        x_vis = self.visit_model(x_vis)
+        return self.cls(x_img)
+
+        # x_vis = self.visit_model(x_vis)
         
-        x_cat = torch.cat((x_img,x_vis), 1)
-        x_cat = self.cls(x_cat)
-        return x_cat
+        # x_cat = torch.cat((x_img,x_vis), 1)
+        # x_cat = self.cls(x_cat)
+        # return x_cat
