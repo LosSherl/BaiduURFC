@@ -140,11 +140,11 @@ def main():
 
     model = MultiModalNet("se_resnext101_32x4d", "dpn26", 0.5, num_classes=1000, pretrained=True)
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
-    criterion = torch.nn.CrossEntropyLoss().to(device)
+    criterion = torch.nn.CrossEntropyLoss()
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
     
-    if torch.cuda.device_count() > 1:
-        model = torch.nn.DataParallel(model)
+    # if torch.cuda.device_count() > 1:
+    #     model = torch.nn.DataParallel(model)
     model.to(device)
     
     all_files = pd.read_csv("train.csv")
