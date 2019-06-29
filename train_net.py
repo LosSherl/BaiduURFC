@@ -77,7 +77,7 @@ def do_train(name, model, device, trndata_loader, valdata_loader, optimizer, cri
                 correct = acc * labels.size(0)
                 total += labels.size(0) 
         logger.info("Epoch:[{}/{}], validation loss: {}, Validation acc@1: {}%".format(
-            epoch + 1, nepochs, val_loss, correct / total))   
+            epoch + 1, nepochs, val_loss, 100 * correct / total))   
 
         scheduler.step(val_loss)
 
@@ -144,7 +144,7 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    model = MultiModalNet("se_resnext101_32x4d", "dpn26", 0.5, num_classes=1000, pretrained=True)
+    model = MultiModalNet("se_resnext101_32x4d", "dpn26", 0.5, num_classes=9, pretrained=True)
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
     criterion = torch.nn.CrossEntropyLoss().to(device)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
