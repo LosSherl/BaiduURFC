@@ -35,7 +35,6 @@ def do_train(name, model, device, trndata_loader, valdata_loader, optimizer, cri
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            logger.info(torch.cuda.max_memory_allocated() / 1024.0 / 1024.0)
             if iteration % 50 == 0:
                 logger.info(
                 ", ".join(
@@ -137,7 +136,7 @@ def main():
 
     args = parser.parse_args()
 
-    logger = setupLogger(args.name, args.output_dir)
+    logger = setupLogger(args.name, args.output_dir, filename=args.name + "_log.txt")
     logger.info(args)  
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
