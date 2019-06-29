@@ -131,7 +131,7 @@ def main():
     )
     parser.add_argument(
         "-name",
-        dest = "name"
+        dest = "name",
         default = "URFC"
     )
 
