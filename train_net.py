@@ -15,8 +15,8 @@ from Utils.checkpoint import Checkpointer
 from modeling.MMmodel import MultiModalNet
 from dataset.dataset_builder import MMDataset
 
-def do_train(model, device, trndata_loader, valdata_loader, optimizer, criterion, scheduler, nepochs, checkpoint_period, checkpointer):
-    logger = logging.getLogger(name="URFC")
+def do_train(name, model, device, trndata_loader, valdata_loader, optimizer, criterion, scheduler, nepochs, checkpoint_period, checkpointer):
+    logger = logging.getLogger(name=name)
     logger.info("Start training")
     
     total_step = len(trndata_loader)
@@ -36,7 +36,7 @@ def do_train(model, device, trndata_loader, valdata_loader, optimizer, criterion
             loss.backward()
             optimizer.step()
             logger.info(torch.cuda.max_memory_allocated() / 1024.0 / 1024.0)
-            if iteration % 1 == 0:
+            if iteration % 50 == 0:
                 logger.info(
                 ", ".join(
                         [
@@ -129,18 +129,22 @@ def main():
         "-ckt",
         dest = "ckt"
     )
-
+    parser.add_argument(
+        "-name",
+        dest = "name"
+        default = "URFC"
+    )
 
     args = parser.parse_args()
 
-    logger = setupLogger("URFC", args.output_dir)
+    logger = setupLogger(args.name, args.output_dir)
     logger.info(args)  
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model = MultiModalNet("se_resnext101_32x4d", "dpn26", 0.5, num_classes=1000, pretrained=True)
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
-    criterion = torch.nn.CrossEntropyLoss()
+    criterion = torch.nn.CrossEntropyLoss().to(device)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
     
     # if torch.cuda.device_count() > 1:
@@ -169,7 +173,7 @@ def main():
         model, optimizer, criterion, scheduler, args.output_dir,
     )
 
-    do_train(model, device, trndata_loader, valdata_loader, optimizer, criterion, scheduler, args.nepochs, args.checkpoint_period, checkpointer)
+    do_train(args.name, model, device, trndata_loader, valdata_loader, optimizer, criterion, scheduler, args.nepochs, args.checkpoint_period, checkpointer)
 
 if __name__ == "__main__":
     main()
