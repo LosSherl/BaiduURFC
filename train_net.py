@@ -63,6 +63,8 @@ def do_train(name, model, device, trndata_loader, valdata_loader, optimizer, cri
         model.eval()
         with torch.no_grad():
             val_loss = 0
+            total = 0
+            correct = 0
             for _, (imgs, visits, labels) in enumerate(valdata_loader):
                 imgs = imgs.to(device)
                 visits = visits.to(device)
@@ -71,10 +73,11 @@ def do_train(name, model, device, trndata_loader, valdata_loader, optimizer, cri
                 
                 output = model(imgs, visits)
                 val_loss += criterion(output, labels)
-                
                 acc = accuracy_score(labels.cpu().data.numpy(),np.argmax(torch.nn.functional.softmax(output).cpu().data.numpy(), axis=1))
-        logger.info("Epoch:[{}/{}], Validation acc@1: {}%".format(
-            epoch + 1, nepochs, 100 * acc))   
+                correct = acc * labels.size(0)
+                total += labels.size(0) 
+        logger.info("Epoch:[{}/{}], validation loss: {}, Validation acc@1: {}%".format(
+            epoch + 1, nepochs, val_loss, correct / total))   
 
         scheduler.step(val_loss)
 
