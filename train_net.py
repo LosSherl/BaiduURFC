@@ -73,8 +73,7 @@ def do_train(name, model, device, trndata_loader, valdata_loader, optimizer, cri
                 
                 output = model(imgs, visits)
                 val_loss += criterion(output, labels)
-                acc = accuracy_score(labels.cpu().data.numpy(),np.argmax(torch.nn.functional.softmax(output).cpu().data.numpy(), axis=1))
-                correct = acc * labels.size(0)
+                correct += accuracy_score(labels.cpu().data.numpy(),np.argmax(output.cpu().data.numpy(), axis=1),normalize=False)
                 total += labels.size(0) 
         logger.info("Epoch:[{}/{}], validation loss: {}, Validation acc@1: {}%".format(
             epoch + 1, nepochs, val_loss, 100 * correct / total))   
