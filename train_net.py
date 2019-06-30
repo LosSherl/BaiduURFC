@@ -3,91 +3,18 @@ import argparse
 import os
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
 import pandas as pd
 from torch.utils.data import DataLoader
 import logging
 import time
 import datetime
 
-from Utils.logger import setupLogger
-from Utils.checkpoint import Checkpointer
+from tools.logger import setupLogger
+from tools.checkpoint import Checkpointer
 from modeling.MMmodel import MultiModalNet
 from dataset.dataset_builder import MMDataset
-
-def do_train(name, model, device, trndata_loader, valdata_loader, optimizer, criterion, scheduler, nepochs, checkpoint_period, checkpointer):
-    logger = logging.getLogger(name=name)
-    logger.info("Start training")
-    
-    total_step = len(trndata_loader)
-    start_training_time = time.time()
-    for epoch in range(nepochs):
-        model.train()
-        for iteration, (imgs, visits, labels) in enumerate(trndata_loader):
-            imgs = imgs.to(device)
-            visits = visits.to(device)
-            # idx_labels = labels.clone()
-            labels = torch.from_numpy(np.array(labels)).long().to(device)
-
-            output = model(imgs, visits)
-            loss = criterion(output, labels)
-
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            if iteration % 50 == 0:
-                logger.info(
-                ", ".join(
-                        [
-                            "Epoch: [{epoch}/{num_epochs}]",
-                            "Step: [{iter}/{total_step}",
-                            "Loss: {loss:.4f}",
-                            "lr: {lr:.6f}",
-                            "max mem: {memory:.0f}",
-                        ]
-                    ).format(
-                        epoch = epoch + 1, num_epochs = nepochs,
-                        iter = iteration + 1, total_step = total_step,
-                        loss = loss.item(),
-                        lr = optimizer.param_groups[0]["lr"],
-                        memory = torch.cuda.max_memory_allocated() / 1024.0 / 1024.0,
-                    )
-                )
-        time_spent = time.time() - start_training_time
-        logger.info("Epoch:[{}/{}], Time spent {}, Time per epoch {:.4f} s".format(
-            epoch + 1, nepochs, str(datetime.timedelta(seconds=time_spent)), time_spent / (epoch + 1)))
-        if (epoch + 1) % checkpoint_period == 0:
-            checkpointer.save("model_{:07d}".format(epoch + 1))
-
-        # val
-        model.eval()
-        with torch.no_grad():
-            val_loss = 0
-            total = 0
-            correct = 0
-            for _, (imgs, visits, labels) in enumerate(valdata_loader):
-                imgs = imgs.to(device)
-                visits = visits.to(device)
-                # idx_labels = labels.clone()
-                labels = torch.from_numpy(np.array(labels)).long().to(device)
-                
-                output = model(imgs, visits)
-                val_loss += criterion(output, labels)
-                correct += accuracy_score(labels.cpu().data.numpy(),np.argmax(output.cpu().data.numpy(), axis=1),normalize=False)
-                total += labels.size(0) 
-        logger.info("Epoch:[{}/{}], validation loss: {}, Validation acc@1: {}%".format(
-            epoch + 1, nepochs, val_loss, 100 * correct / total))   
-
-        scheduler.step(val_loss)
-
-    checkpointer.save("model_final")
-    total_training_time = time.time() - start_training_time
-    total_time_str = str(datetime.timedelta(seconds=total_training_time))
-    logger.info(
-        "Total training time: {} ({:.4f} s / epoch)".format(
-            total_time_str, total_training_time / (nepochs)
-        )
-    )
+from engine.trainer import do_train
+from engine.test import test_submit
 
 def main():
     parser = argparse.ArgumentParser(description="Baidu URFC")
@@ -138,7 +65,10 @@ def main():
 
     args = parser.parse_args()
 
-    logger = setupLogger(args.name, args.output_dir, filename=args.name + "_log.txt")
+    output_dir = os.path.join(args.output_dir, args.name) 
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+    logger = setupLogger(args.name, output_dir, filename=args.name + "_log.txt")
     logger.info(args)  
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -171,10 +101,12 @@ def main():
     test_loader = DataLoader(testdatasets, 1, shuffle=False, pin_memory=True, num_workers=1)
 
     checkpointer = Checkpointer(
-        model, optimizer, criterion, scheduler, args.output_dir,
+        model, optimizer, criterion, scheduler, output_dir,
     )
 
     do_train(args.name, model, device, trndata_loader, valdata_loader, optimizer, criterion, scheduler, args.nepochs, args.checkpoint_period, checkpointer)
+    model = checkpointer.load(os.path.join(output_dir, "best_model.pth"))
+    test_submit(model, test_loader, device, output_dir)
 
 if __name__ == "__main__":
     main()
