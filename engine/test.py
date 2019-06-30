@@ -13,6 +13,6 @@ def test_submit(model, test_loader, device, output_dir="."):
             imgs = imgs.to(device)
             visits = visits.to(device)
             y_pred = model(imgs, visits)
-            labels = np.argmax(y_pred, axis=1)
+            labels = np.argmax(y_pred.cpu().data.numpy(), axis=1)
             for j in range(imgs.size(0)): 
                 f.write(filepath[j] + "\t" + str(labels[j]))
