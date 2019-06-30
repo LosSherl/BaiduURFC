@@ -39,10 +39,10 @@ def main():
     )
     args = parser.parse_args()
 
-    model = None
-    checkpointer = Checkpointer(model)
-    checkpointer.load(args.ckt)
-    
+    checkpoint = torch.load(args.ckt, map_location=torch.device("cpu"))
+    model = MultiModalNet("se_resnext101_32x4d", "dpn26", 0.5, num_classes=9, pretrained=True)
+    model.load_state_dict(checkpoint["model"])
+
     test_files = pd.read_csv("test.csv")
     test_img = os.path.join(args.root_path, "test")
     test_visit = os.path.join(args.root_path, "npy", "test_visit")
