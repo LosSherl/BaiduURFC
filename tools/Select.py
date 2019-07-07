@@ -57,7 +57,7 @@ if __name__ == '__main__':
             if ratio > 0.9:
                 shutil.copyfile(abs_path, os.path.join(bad_dir, img))
                 continue
-            f.write(d + "/" + img + "," + d[-1] + "\n")
+            f.write(d + "/" + img + "," + str(int(d[-1]) - 1) + "\n")
 
 
 
