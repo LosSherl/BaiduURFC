@@ -41,7 +41,7 @@ if __name__ == '__main__':
     path = "/dataset/2019_big_data_competition_final"
     bad_dir = os.path.join(path, "bad_samples")
     f = open("/code/cl/BaiduURFC/train.csv", "w")
-    f.write("Id,Target")
+    f.write("Id,Target\n")
     path = os.path.join(path, "train")
     if not os.path.exists(bad_dir):
         os.makedirs(bad_dir)
@@ -57,7 +57,7 @@ if __name__ == '__main__':
             if ratio > 0.9:
                 shutil.copyfile(abs_path, os.path.join(bad_dir, img))
                 continue
-            f.write(d + "/" + img + "," + d[-1])
+            f.write(d + "/" + img + "," + d[-1] + "\n")
 
 
 
