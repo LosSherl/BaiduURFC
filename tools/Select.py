@@ -46,7 +46,7 @@ if __name__ == '__main__':
     for d in os.listdir(path):
         cur_dir = os.path.join(path, d)
         for img in os.listdir(cur_dir):
-            abs_path = os.path.abspath(img)
+            abs_path = os.path.join(path, d, img)
             ratio = calc_black_ratio(abs_path)
             if ratio > 0.25:
                 shutil.copyfile(abs_path, os.path.join(bad_dir, img))
