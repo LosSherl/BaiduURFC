@@ -40,7 +40,7 @@ def calc_white_ratio(img_path):
 if __name__ == '__main__':
     path = "/dataset/2019_big_data_competition_final"
     bad_dir = os.path.join(path, "bad_samples")
-    f = open("train.csv", "w")
+    f = open("/code/cl/BaiduURFC/train.csv", "w")
     f.write("Id,Target")
     path = os.path.join(path, "train")
     if not os.path.exists(bad_dir):
