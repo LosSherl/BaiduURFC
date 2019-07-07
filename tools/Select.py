@@ -24,7 +24,7 @@ def calc_black_ratio(img_path):
     return ratio
 
 def calc_white_ratio(img_path):
-    Img = cv2.imread(img_path))
+    Img = cv2.imread(img_path)
     Gray = tr.Compose([
                        tr.ToPILImage(),
                        tr.Grayscale(),
