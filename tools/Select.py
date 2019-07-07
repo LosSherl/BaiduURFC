@@ -6,6 +6,7 @@ import numpy as np
 import csv
 import shutil
 import os
+from tqdm import tqdm
 import torchvision.transforms as tr
 import copy as cp
 
@@ -37,13 +38,15 @@ def calc_white_ratio(img_path):
     return ratio
 
 if __name__ == '__main__':
-    path = "/dataset/2019_big_data_competition_final/train"
+    path = "/dataset/2019_big_data_competition_final"
+    bad_dir = os.path.join(path, "bad_samples")
     f = open("../train.csv", "w")
     f.write("Id,Target")
-    bad_dir = os.path.join(path, "bad_samples")
+    f.flush()
+    path = os.path.join(path, "train")
     if not os.path.exists(bad_dir):
         os.makedirs(bad_dir)
-    for d in os.listdir(path):
+    for d in tqdm(os.listdir(path)):
         cur_dir = os.path.join(path, d)
         for img in os.listdir(cur_dir):
             abs_path = os.path.join(path, d, img)
