@@ -3,6 +3,7 @@ import argparse
 import os
 import numpy as np
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import KFold
 import pandas as pd
 from torch.utils.data import DataLoader
 import logging
@@ -62,6 +63,12 @@ def main():
         dest = "name",
         default = "URFC"
     )
+    parser.add_argument(
+        "-s",
+        type = int,
+        dest = "split",
+        default = 0
+    )
 
     args = parser.parse_args()
 
@@ -84,20 +91,24 @@ def main():
     
     all_files = pd.read_csv("train.csv")
     test_files = pd.read_csv("test.csv")
-    train_datalist, val_datalist = train_test_split(all_files, test_size=0.1, random_state=2050)
+    kf = KFold(n_splits=10, random_state=2050)
+    splits = []
+    for train_list, test_list in kf.split(all_files):
+        splits.append((train_list, test_list))
+    # train_datalist, val_datalist = train_test_split(all_files, test_size=0.1, random_state=2050)
 
     train_img = os.path.join(args.root_path, "train")
     test_img = os.path.join(args.root_path, "test")
     train_visit = os.path.join(args.root_path, "npy", "train_visit")
     test_visit = os.path.join(args.root_path, "npy", "test_visit")
     
-    trndatasets = MMDataset(train_datalist, train_img, train_visit, mode="train")
+    trndatasets = MMDataset(all_files, splits[args.split][0], train_img, train_visit, mode="train")
     trndata_loader = DataLoader(trndatasets, batch_size=args.batch_size, shuffle=True, pin_memory=True, num_workers=1)
     
-    valdatasets = MMDataset(val_datalist, train_img, train_visit, augment=False, mode="train")
+    valdatasets = MMDataset(all_files, splits[args.split][1], train_img, train_visit, augment=False, mode="train")
     valdata_loader = DataLoader(valdatasets, batch_size=args.batch_size, shuffle=False, pin_memory=True, num_workers=1)
 
-    testdatasets = MMDataset(test_files, test_img, test_visit, augment=False, mode="test")
+    testdatasets = MMDataset(test_files, [i for i in range(test_files)], test_img, test_visit, augment=False, mode="test")
     test_loader = DataLoader(testdatasets, 1, shuffle=False, pin_memory=True, num_workers=1)
 
     checkpointer = Checkpointer(
