@@ -37,7 +37,7 @@ def calc_white_ratio(img_path):
     return ratio
 
 if __name__ == '__main__':
-    path = "/dataset/2019_big_data_competition_final"
+    path = "/dataset/2019_big_data_competition_final/train"
     f = open("../train.csv", "w")
     f.write("Id,Target")
     bad_dir = os.path.join(path, "bad_samples")
