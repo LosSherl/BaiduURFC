@@ -20,7 +20,7 @@ class MMDataset(Dataset):
         self.mode = mode
     
     def __len__(self):
-        return len(self.images_df)
+        return len(self.indexs)
 
     def __getitem__(self, index):
         ind = self.indexs[index]
