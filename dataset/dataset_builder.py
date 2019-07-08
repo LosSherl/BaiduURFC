@@ -13,7 +13,6 @@ class MMDataset(Dataset):
         if not isinstance(vis_path, pathlib.Path):
             vis_path = pathlib.Path(vis_path)
         self.images_df = images_df.copy()
-        self.indexs = indexs
         self.augment = augment
         self.vis_path = vis_path
         self.images_df.Id = self.images_df.Id.apply(lambda x : root_path / str(x).zfill(6))
