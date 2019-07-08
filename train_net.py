@@ -89,12 +89,17 @@ def main():
     #     model = torch.nn.DataParallel(model)
     model.to(device)
     
-    all_files = pd.read_csv("train.csv")
+    train_files = pd.read_csv("train.csv")
     test_files = pd.read_csv("test.csv")
     kf = KFold(n_splits=10, random_state=2050)
     splits = []
-    for train_list, test_list in kf.split(all_files):
+    for train_list, test_list in kf.split(train_files):
         splits.append((train_list, test_list))
+    
+    val_files = train_files.copy()
+    train_files.drop(splits[args.split][1])
+    val_files.drop(splits[args.split][0])
+
     # train_datalist, val_datalist = train_test_split(all_files, test_size=0.1, random_state=2050)
 
     train_img = os.path.join(args.root_path, "train")
@@ -102,13 +107,13 @@ def main():
     train_visit = os.path.join(args.root_path, "npy", "train_visit")
     test_visit = os.path.join(args.root_path, "npy", "test_visit")
     
-    trndatasets = MMDataset(all_files, splits[args.split][0], train_img, train_visit, mode="train")
+    trndatasets = MMDataset(train_files, train_img, train_visit, mode="train")
     trndata_loader = DataLoader(trndatasets, batch_size=args.batch_size, shuffle=True, pin_memory=True, num_workers=1)
     
-    valdatasets = MMDataset(all_files, splits[args.split][1], train_img, train_visit, augment=False, mode="train")
+    valdatasets = MMDataset(val_files, train_img, train_visit, augment=False, mode="val")
     valdata_loader = DataLoader(valdatasets, batch_size=args.batch_size, shuffle=False, pin_memory=True, num_workers=1)
 
-    testdatasets = MMDataset(test_files, [i for i in range(len(test_files))], test_img, test_visit, augment=False, mode="test")
+    testdatasets = MMDataset(test_files, test_img, test_visit, augment=False, mode="test")
     test_loader = DataLoader(testdatasets, 1, shuffle=False, pin_memory=True, num_workers=1)
 
     checkpointer = Checkpointer(

@@ -7,7 +7,7 @@ import os
 from imgaug import augmenters
 
 class MMDataset(Dataset):
-    def __init__(self, images_df, indexs, root_path, vis_path, augment=True, mode="train"):
+    def __init__(self, images_df, root_path, vis_path, augment=True, mode="train"):
         if not isinstance(root_path, pathlib.Path):
             root_path = pathlib.Path(root_path)
         if not isinstance(vis_path, pathlib.Path):
@@ -20,16 +20,15 @@ class MMDataset(Dataset):
         self.mode = mode
     
     def __len__(self):
-        return len(self.indexs)
+        return len(self.images_df)
 
     def __getitem__(self, index):
-        ind = self.indexs[index]
-        x = self.read_image(ind)
-        visit = self.read_npy(ind).transpose(1,2,0)
+        x = self.read_image(index)
+        visit = self.read_npy(index).transpose(1,2,0)
         if not self.mode == "test":
-            y = self.images_df.iloc[ind].Target
+            y = self.images_df.iloc[index].Target
         else:
-            y = str(self.images_df.iloc[ind].Id.absolute())
+            y = str(self.images_df.iloc[index].Id.absolute())
         if self.augment:
             x = self.augmentor(x)
         x = transforms.Compose([
