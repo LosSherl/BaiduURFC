@@ -108,7 +108,7 @@ def main():
     valdatasets = MMDataset(all_files, splits[args.split][1], train_img, train_visit, augment=False, mode="train")
     valdata_loader = DataLoader(valdatasets, batch_size=args.batch_size, shuffle=False, pin_memory=True, num_workers=1)
 
-    testdatasets = MMDataset(test_files, [i for i in range(test_files)], test_img, test_visit, augment=False, mode="test")
+    testdatasets = MMDataset(test_files, [i for i in range(len(test_files))], test_img, test_visit, augment=False, mode="test")
     test_loader = DataLoader(testdatasets, 1, shuffle=False, pin_memory=True, num_workers=1)
 
     checkpointer = Checkpointer(
