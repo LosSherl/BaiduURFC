@@ -38,6 +38,8 @@ def calc_white_ratio(img_path):
     return ratio
 
 if __name__ == '__main__':
+    total = 0
+    bad_cnt = 0
     path = "/dataset/2019_big_data_competition_final"
     bad_dir = os.path.join(path, "bad_samples")
     f = open("/code/cl/BaiduURFC/train.csv", "w")
@@ -48,17 +50,21 @@ if __name__ == '__main__':
     for d in tqdm(os.listdir(path)):
         cur_dir = os.path.join(path, d)
         for img in os.listdir(cur_dir):
+            total += 1
             abs_path = os.path.join(path, d, img)
             ratio = calc_black_ratio(abs_path)
             if ratio > 0.25:
                 shutil.copyfile(abs_path, os.path.join(bad_dir, img))
+                bad_cnt += 1
                 continue
             ratio = calc_white_ratio(abs_path)
             if ratio > 0.9:
+                bad_cnt += 1
                 shutil.copyfile(abs_path, os.path.join(bad_dir, img))
                 continue
-            f.write(d + "/" + img + "," + str(int(d[-1]) - 1) + "\n")
-
+            f.write(d + "/" + img.split(".")[0] + "," + str(int(d[-1]) - 1) + "\n")
+    print("total: ", str(total))
+    print("bad: ", str(bad_cnt))
 
 
 
