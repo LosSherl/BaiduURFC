@@ -53,7 +53,7 @@ def main():
     splits = []
     for train_list, test_list in kf.split(val_files):
         splits.append((train_list, test_list))
-    val_files.drop(splits[0][0])
+    val_files = val_files.drop(splits[0][0])
     valdatasets = MMDataset(val_files, val_img, val_visit, augment=False, mode="val")
     val_loader = DataLoader(valdatasets, 128, shuffle=False, pin_memory=True, num_workers=1)
 
