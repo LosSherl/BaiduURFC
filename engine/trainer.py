@@ -61,8 +61,8 @@ def do_train(name, model, device, trndata_loader, valdata_loader, optimizer, cri
         model.eval()
         with torch.no_grad():
             val_loss = 0
-            total = 0
-            correct = 0
+            val_total = 0
+            val_correct = 0
             for _, (imgs, visits, labels) in enumerate(valdata_loader):
                 imgs = imgs.to(device)
                 visits = visits.to(device)
@@ -71,17 +71,17 @@ def do_train(name, model, device, trndata_loader, valdata_loader, optimizer, cri
                 
                 output = model(imgs, visits)
                 val_loss += criterion(output, labels)
-                correct += accuracy_score(labels.cpu().data.numpy(),np.argmax(output.cpu().data.numpy(), axis=1),normalize=False)
-                total += labels.size(0) 
-        acc = 100 * correct / total
-        logger.info("Epoch:[{}/{}], validation loss: {}, Validation acc@1: {}%".format(
-            epoch + 1, nepochs, val_loss, acc))   
+                val_correct += accuracy_score(labels.cpu().data.numpy(),np.argmax(output.cpu().data.numpy(), axis=1),normalize=False)
+                val_total += labels.size(0) 
+        val_acc = 100 * val_correct / val_total
+        logger.info("Epoch:[{}/{}], validation loss: {}, Validation acc@1: {:.4f}%".format(
+            epoch + 1, nepochs, val_loss, val_acc))   
 
         scheduler.step(val_loss)
         if (epoch + 1) % checkpoint_period == 0:
             checkpointer.save("model_{:07d}".format(epoch + 1))
-        if acc > best_acc:
-            best_acc = acc
+        if val_acc > best_acc:
+            best_acc = val_acc
             checkpointer.save("best_model")
     checkpointer.save("model_final")
     total_training_time = time.time() - start_training_time
