@@ -41,7 +41,7 @@ def do_train(name, model, device, trndata_loader, valdata_loader, optimizer, cri
                             "Step: [{iter}/{total_step}",
                             "Loss: {loss:.4f}",
                             "lr: {lr:.6f}",
-                            "acc: {acc:.6f}%"
+                            "acc: {acc:.6f}%",
                             "max mem: {memory:.0f}",
                         ]
                     ).format(
