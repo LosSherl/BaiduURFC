@@ -96,9 +96,8 @@ def main():
     for train_list, test_list in kf.split(train_files):
         splits.append((train_list, test_list))
     
-    val_files = train_files.copy()
-    train_files.drop(splits[args.split][1])
-    val_files.drop(splits[args.split][0])
+    val_files = train_files.drop(splits[args.split][0])
+    train_files = train_files.drop(splits[args.split][1])
 
     # train_datalist, val_datalist = train_test_split(all_files, test_size=0.1, random_state=2050)
 
