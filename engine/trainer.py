@@ -16,6 +16,8 @@ def do_train(name, model, device, trndata_loader, valdata_loader, optimizer, cri
     best_acc = 0.0
     for epoch in range(nepochs):
         model.train()
+        correct = 0
+        total = 0
         for iteration, (imgs, visits, labels) in enumerate(trndata_loader):
             imgs = imgs.to(device)
             visits = visits.to(device)
@@ -24,7 +26,10 @@ def do_train(name, model, device, trndata_loader, valdata_loader, optimizer, cri
 
             output = model(imgs, visits)
             loss = criterion(output, labels)
-
+            
+            correct += accuracy_score(labels.cpu().data.numpy(),np.argmax(output.cpu().data.numpy(), axis=1),normalize=False)
+            total += labels.size(0) 
+            
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -36,6 +41,7 @@ def do_train(name, model, device, trndata_loader, valdata_loader, optimizer, cri
                             "Step: [{iter}/{total_step}",
                             "Loss: {loss:.4f}",
                             "lr: {lr:.6f}",
+                            "acc: {acc:.6f}%"
                             "max mem: {memory:.0f}",
                         ]
                     ).format(
@@ -43,6 +49,7 @@ def do_train(name, model, device, trndata_loader, valdata_loader, optimizer, cri
                         iter = iteration + 1, total_step = total_step,
                         loss = loss.item(),
                         lr = optimizer.param_groups[0]["lr"],
+                        acc = 100 * correct / total,
                         memory = torch.cuda.max_memory_allocated() / 1024.0 / 1024.0,
                     )
                 )
