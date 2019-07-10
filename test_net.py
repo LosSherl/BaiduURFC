@@ -61,7 +61,7 @@ def main():
     test_img = os.path.join(args.root_path, "test")
     test_visit = os.path.join(args.root_path, "npy", "test_visit")
     testdatasets = MMDataset(test_files, test_img, test_visit, augment=False, mode="test")
-    test_loader = DataLoader(testdatasets, 1, shuffle=False, pin_memory=True, num_workers=1)
+    test_loader = DataLoader(testdatasets, 128, shuffle=False, pin_memory=True, num_workers=1)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
