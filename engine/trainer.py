@@ -73,9 +73,7 @@ def do_train(name, model, device, trndata_loader, valdata_loader, optimizer, cri
                 val_loss += criterion(output, labels)
                 val_correct += accuracy_score(labels.cpu().data.numpy(),np.argmax(output.cpu().data.numpy(), axis=1),normalize=False)
                 val_total += labels.size(0) 
-        val_acc = 100 * val_correct / val_total
-        logger.info("Epoch:[{}/{}], validation loss: {}, Validation acc@1: {:.4f}%, best acc@1: {:.4f}%".format(
-            epoch + 1, nepochs, val_loss, val_acc, best_acc))   
+        val_acc = 100 * val_correct / val_total   
 
         scheduler.step(val_loss)
         if (epoch + 1) % checkpoint_period == 0:
@@ -83,6 +81,8 @@ def do_train(name, model, device, trndata_loader, valdata_loader, optimizer, cri
         if val_acc > best_acc:
             best_acc = val_acc
             checkpointer.save("best_model")
+        logger.info("Epoch:[{}/{}], validation loss: {}, Validation acc@1: {:.4f}%, best acc@1: {:.4f}%".format(
+            epoch + 1, nepochs, val_loss, val_acc, best_acc))
     checkpointer.save("model_final")
     total_training_time = time.time() - start_training_time
     total_time_str = str(datetime.timedelta(seconds=total_training_time))
