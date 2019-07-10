@@ -6,6 +6,7 @@ import numpy as np
 def test_submit(model, test_loader, device, output_dir="."):
     model.to(device)
     model.eval()
+    res = dict()
     f = open(os.path.join(output_dir, "submit.txt"), "w")
     for i, (imgs, visits, filepath) in tqdm(enumerate(test_loader)):
         filepath = [os.path.basename(x) for x in filepath]
@@ -15,4 +16,7 @@ def test_submit(model, test_loader, device, output_dir="."):
             y_pred = model(imgs, visits)
             labels = np.argmax(y_pred.cpu().data.numpy(), axis=1)
             for j in range(imgs.size(0)): 
-                f.write(filepath[j] + "\t00" + str(labels[j] + 1) + "\n")
+                res[filepath[j]] = filepath[j] + "\t00" + str(labels[j] + 1) + "\n"
+    for i in range(10000):
+        key = str(i).zfill(6)
+        f.write(res[key])
