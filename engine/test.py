@@ -17,6 +17,6 @@ def test_submit(model, test_loader, device, output_dir="."):
             labels = np.argmax(y_pred.cpu().data.numpy(), axis=1)
             for j in range(imgs.size(0)): 
                 res[filepath[j]] = filepath[j] + "\t00" + str(labels[j] + 1) + "\n"
-    for i in range(10000):
+    for i in range(100000):
         key = str(i).zfill(6)
         f.write(res[key])
