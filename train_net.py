@@ -122,7 +122,7 @@ def main():
     do_train(args.name, model, device, trndata_loader, valdata_loader, optimizer, criterion, scheduler, args.nepochs, args.checkpoint_period, checkpointer)
     checkpoint = torch.load(os.path.join(output_dir, "best_model.pth"), map_location=torch.device("cpu"))
     model.load_state_dict(checkpoint["model"])
-    logger.info("load model from " + os.path.join(output_dir, "best_model.pth"), map_location=torch.device("cpu"))
+    logger.info("load model from " + os.path.join(output_dir, "best_model.pth"))
     test_submit(model, test_loader, device, output_dir)
 
 if __name__ == "__main__":
