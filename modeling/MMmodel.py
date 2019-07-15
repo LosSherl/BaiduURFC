@@ -127,3 +127,47 @@ class MultiModalNet(nn.Module):
         x_cat = torch.cat((x_img,x_vis), 1)
         x_cat = self.cls(x_cat)
         return x_cat
+
+class MultiModalNet_MS(nn.Module):
+    def __init__(self, backbone1, backbone2, drop, num_classes, pretrained=True):
+        super().__init__()
+        if pretrained:
+            img_model = pretrainedmodels.__dict__[backbone1](num_classes=1000, pretrained="imagenet")
+        else:
+            img_model = pretrainedmodels.__dict__[backbone1](num_classes=1000, pretrained=None)
+        
+        self.visit_model = DPN26()
+
+        self.img_encoder = list(img_model.children())[:-2]
+        self.img_encoder.append(nn.AdaptiveAvgPool2d(1))
+        self.img_encoder = nn.Sequential(*self.img_encoder)
+
+        if drop > 0:
+            self.img_fc = nn.Sequential(
+                FCViewer(),
+                nn.Dropout(drop),
+                nn.Linear(img_model.last_linear.in_features, 256)
+            )
+        else:
+            self.img_fc = nn.Sequential(
+                FCViewer(),
+                nn.Linear(img_model.last_linear.in_features, 256)
+            )
+        self.cls = nn.Linear(320, num_classes)
+
+    def forward(self, x_img, x_vis):
+        input_size = x_img.size()[2]
+        self.interp = nn.UpsamplingBilinear2d(size = (int(input_size*1.25)+1,  int(input_size*1.25)+1))
+        x_img2 = self.interp(x_img)
+        
+        x_img = self.img_encoder(x_img)
+        x_img2 = self.img_encoder(x_img2)
+
+        x_img = x_img + x_img2
+
+        x_img = self.img_fc(x_img)
+
+        x_vis = self.visit_model(x_vis)
+        x_cat = torch.cat((x_img,x_vis),1)
+        x_cat = self.cls(x_cat)
+        return x_cat
