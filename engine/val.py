@@ -28,6 +28,8 @@ def ensemble_val(models, val_loader, device):
         model = model.to(device)
         model.eval()
     with torch.no_grad():
+        total = 0
+        correct = 0
         for i, (imgs, visits, labels) in enumerate(val_loader):
             imgs = imgs.to(device)
             visits = visits.to(device)
