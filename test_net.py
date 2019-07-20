@@ -13,8 +13,8 @@ from tools.logger import setupLogger
 from tools.checkpoint import Checkpointer
 from modeling.MMmodel import MultiModalNet
 from dataset.dataset_builder import MMDataset
-from engine.test import test_submit
-from engine.val import val
+from engine.test import test_submit, ensemble_submit
+from engine.val import val, ensemble_val
 
 def main():
     parser = argparse.ArgumentParser(description="Baidu URFC")
@@ -22,6 +22,13 @@ def main():
         "-p", 
         dest = "root_path",
         help = "path to data"
+    )
+    parser.add_argument(
+        "-e", 
+        dest = "ensemble",
+        help = "if ensemble",
+        type = bool,
+        default = False
     )
     parser.add_argument(
         "-o",
@@ -39,11 +46,6 @@ def main():
         default = "URFC"
     )
     args = parser.parse_args()
-
-    checkpoint = torch.load(args.ckt, map_location=torch.device("cpu"))
-    model = MultiModalNet("se_resnext101_32x4d", "dpn26", 0.5, num_classes=9, pretrained=True)
-    model.load_state_dict(checkpoint["model"])
-    print("model loaded from ", args.ckt)
 
     val_files = pd.read_csv("train.csv")
     val_img = os.path.join(args.root_path, "train")
@@ -64,9 +66,29 @@ def main():
     test_loader = DataLoader(testdatasets, 128, shuffle=False, pin_memory=True, num_workers=1)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if args.ensemble:
+        model1 = MultiModalNet("se_resnext101_32x4d", "dpn26", 0.5, num_classes=9, pretrained=True)
+        model2 = MultiModalNet("se_resnext101_32x4d", "dpn26", 0.5, num_classes=9, pretrained=True)
+        model3 = MultiModalNet("se_resnext101_32x4d", "dpn26", 0.5, num_classes=9, pretrained=True)
+        
+        checkpoint1 = torch.load("/code/cl/BaiduURFC/ouputs/ori-0/best_model.pth", map_location=torch.device("cpu"))
+        checkpoint2 = torch.load("/code/cl/BaiduURFC/ouputs/ori-1/best_model.pth", map_location=torch.device("cpu"))
+        checkpoint3 = torch.load("/code/cl/BaiduURFC/ouputs/ori-2/best_model.pth", map_location=torch.device("cpu"))
+        
+        model1.load_state_dict(checkpoint1["model"])
+        model2.load_state_dict(checkpoint2["model"])
+        model3.load_state_dict(checkpoint3["model"])
 
-    # val(model, val_loader, device)
-    test_submit(model, test_loader, device)
+        models = [model1, model2, model3]
+        ensemble_val(models, val_loader, device)
+        ensemble_submit(models, test_loader, device)
+    else:
+        checkpoint = torch.load(args.ckt, map_location=torch.device("cpu"))
+        model = MultiModalNet("se_resnext101_32x4d", "dpn26", 0.5, num_classes=9, pretrained=True)
+        model.load_state_dict(checkpoint["model"])
+        print("model loaded from ", args.ckt)
+        # val(model, val_loader, device)
+        test_submit(model, test_loader, device)
 
 if __name__ == "__main__":
     main()

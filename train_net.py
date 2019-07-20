@@ -80,8 +80,8 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # model = MultiModalNet("se_resnext101_32x4d", "dpn26", 0.5, num_classes=9, pretrained=True)
-    model = MultiModalNet_MS("se_resnext101_32x4d", "dpn26", 0.5, num_classes=9, pretrained=True)
+    model = MultiModalNet("se_resnext101_32x4d", "dpn26", 0.5, num_classes=9, pretrained=True)
+    # model = MultiModalNet_MS("se_resnext101_32x4d", "dpn26", 0.5, num_classes=9, pretrained=True)
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
     criterion = torch.nn.CrossEntropyLoss().to(device)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
