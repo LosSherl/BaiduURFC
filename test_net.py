@@ -31,6 +31,12 @@ def main():
         default = False
     )
     parser.add_argument(
+        "-m", 
+        dest = "model_list",
+        help = "list of models to load",
+        default = "models.txt"
+    )
+    parser.add_argument(
         "-o",
         dest = "output_dir",
         help = "output dir",
@@ -67,19 +73,18 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if args.ensemble:
-        model1 = MultiModalNet("se_resnext101_32x4d", "dpn26", 0.5, num_classes=9, pretrained=True)
-        model2 = MultiModalNet("se_resnext101_32x4d", "dpn26", 0.5, num_classes=9, pretrained=True)
-        model3 = MultiModalNet("se_resnext101_32x4d", "dpn26", 0.5, num_classes=9, pretrained=True)
-        
-        checkpoint1 = torch.load("/code/cl/BaiduURFC/ouputs/ori-0/best_model.pth", map_location=torch.device("cpu"))
-        checkpoint2 = torch.load("/code/cl/BaiduURFC/ouputs/ori-1/best_model.pth", map_location=torch.device("cpu"))
-        checkpoint3 = torch.load("/code/cl/BaiduURFC/ouputs/ori-2/best_model.pth", map_location=torch.device("cpu"))
-        
-        model1.load_state_dict(checkpoint1["model"])
-        model2.load_state_dict(checkpoint2["model"])
-        model3.load_state_dict(checkpoint3["model"])
+        ckpts = []
+        models = []
+        f = open(args.model_list, "r")
+        for line in f:
+            line = line.strip()
+            ckpt = torch.load(line, map_location=torch.device("cpu"))
+            ckpts.append(ckpt)    
+        for i in range(len(ckpts)):
+            model = MultiModalNet("se_resnext101_32x4d", "dpn26", 0.5, num_classes=9, pretrained=True)
+            model.load_state_dict(ckpts[i]["model"])
+            models.append(model)
 
-        models = [model1, model2, model3]
         ensemble_val(models, val_loader, device)
         ensemble_submit(models, test_loader, device)
     else:
